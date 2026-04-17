@@ -1,6 +1,10 @@
 import { Button } from "@/components/ui/button";
+import useLogout from "@/hooks/useLogout"
 
 export default function Navbar() {
+
+   const logout = useLogout()
+
   return (
     <div className="flex justify-between items-center px-12 py-4 border-b bg-gray-50">
       
@@ -17,7 +21,7 @@ export default function Navbar() {
       {/* Right */}
       <div className="flex gap-2">
         {/* <Button variant="outline">Login</Button> */}
-        <Button>Logout</Button>
+        <Button  onClick={logout} >Logout</Button>
       </div>
 
     </div>
