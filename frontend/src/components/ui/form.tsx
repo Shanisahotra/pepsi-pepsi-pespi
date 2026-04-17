@@ -1,14 +1,15 @@
 "use client"
+
+import axios from "axios"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
 import { toast } from "sonner"
 import * as z from "zod"
 
+
+import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-} from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import {
   Field,
   FieldError,
@@ -23,6 +24,9 @@ const formSchema = z.object({
 })
 
 export function LoginForm() {
+    
+     const navigate = useNavigate()
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -31,14 +35,46 @@ export function LoginForm() {
     },
   })
 
-  function onSubmit(data: z.infer<typeof formSchema>) {
-    toast("Login Successful", {
-      description: (
-        <pre className="mt-2 w-[320px] overflow-x-auto rounded-md bg-zinc-900 p-4 text-white">
-          <code>{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    })
+  const { formState: { isSubmitting },} = form
+
+  async function onSubmit(data: z.infer<typeof formSchema>) {
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/users/login",
+        {
+          email: data.email,
+          password: data.password,
+        }
+      )
+
+      // Save token if exists
+      if (response.data?.token) {
+        localStorage.setItem("token", response.data.token)
+      }
+
+      // Save user if exists
+      if (response.data?.user) {
+        localStorage.setItem(
+          "user",
+          JSON.stringify(response.data.user)
+        )
+      }
+
+      toast.success("Login Successful")
+      console.log(response.data)
+
+      form.reset()
+
+         navigate("/layout");
+
+    } catch (error: any) {
+      const message =
+        error?.response?.data?.message ||
+        "Login failed. Please try again."
+
+      toast.error(message)
+      console.error(error)
+    }
   }
 
   return (
@@ -127,9 +163,10 @@ export function LoginForm() {
               {/* Submit */}
               <Button
                 type="submit"
+                disabled={isSubmitting}
                 className="w-full bg-indigo-500 font-semibold text-white hover:bg-indigo-400"
               >
-                Sign in
+                {isSubmitting ? "Signing in..." : "Sign in"}
               </Button>
             </form>
 

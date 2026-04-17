@@ -1,7 +1,4 @@
-import { LoginForm } from "./components/ui/form"
-import Layout from "@/component/layout"
-
-
+import Routes from "@/router/Routes"
 
 function App() {
  
@@ -9,9 +6,7 @@ function App() {
   return (
     <>
 
-    <Layout/>
-
-<LoginForm/>
+<Routes/>
      
       
     </>
