@@ -65,7 +65,7 @@ export function LoginForm() {
 
       form.reset()
 
-         navigate("/layout");
+         navigate("/layout/dashboard");
 
     } catch (error: any) {
       const message =

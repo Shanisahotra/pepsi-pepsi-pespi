@@ -1,10 +1,12 @@
 // import DashboardCard from "./DashboardCard";
 import DashboardCard from "./Dashboardcard";
 import { DollarSign, Users, Store, ShoppingCart } from "lucide-react";
+import { ChartAreaInteractive } from "@/charts/ChartAreaInteractive "
 
 export default function Dashboard() {
   return (
-    <div className=" px-6 py-6 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <> 
+       <div className=" px-6 py-6 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
 
       <DashboardCard
         title="Total Sales"
@@ -31,7 +33,12 @@ export default function Dashboard() {
         value="320"
         icon={<ShoppingCart />}
       />
-
+      
     </div>
+     <div>
+       <ChartAreaInteractive />
+     </div>
+    </>
+
   );
 }

@@ -14,8 +14,10 @@ import {
 } from "@/components/ui/sidebar";
 
 import { Home, Users, Settings } from "lucide-react";
+import { useNavigate } from "react-router-dom"
 
 export default function AppSidebar() {
+  const navigate = useNavigate()
   return (
     <Sidebar>
 
@@ -35,14 +37,14 @@ export default function AppSidebar() {
             <SidebarMenu>
 
               <SidebarMenuItem>
-                <SidebarMenuButton>
+                <SidebarMenuButton onClick={() => navigate("/layout/dashboard")}>
                   <Home className="mr-2 h-4 w-4" />
                   Dashboard
                 </SidebarMenuButton>
               </SidebarMenuItem>
 
               <SidebarMenuItem>
-                <SidebarMenuButton>
+                <SidebarMenuButton onClick={() => navigate("/layout/users")}>
                   <Users className="mr-2 h-4 w-4" />
                   Users
                 </SidebarMenuButton>

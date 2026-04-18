@@ -1,10 +1,11 @@
 "use client";
 
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
-// import AppSidebar from "../components/layout/AppSidebar";
 import AppSidebar from "./AppSidebar";
 import Navbar from "./Navbar";
 import Dashboard from "./Dashboard";
+import { Outlet } from "react-router-dom"
+import UsersTable from "./UsersTable";
 
 export default function Layout({ children }) {
   return (
@@ -15,11 +16,11 @@ export default function Layout({ children }) {
       {/* Main Content */}
       <SidebarInset>
          <Navbar />
-         
-         <Dashboard/>
-        
 
-        <div className="p-6">{children}</div>
+         <div className="p-6">
+          <Outlet />
+        </div>
+
       </SidebarInset>
     </SidebarProvider>
   );
