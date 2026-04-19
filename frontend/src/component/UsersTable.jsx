@@ -1,3 +1,8 @@
+"use client"
+
+import { useState } from "react"
+import axios from "axios"
+
 import {
   Table,
   TableBody,
@@ -5,29 +10,124 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
+} from "@/components/ui/table"
+
+import { Edit, Trash2 } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+
+import AddUserForm from "@/components/ui/form/AddUserForm"
 
 export default function UsersTable() {
-  const users = [
-    { id: 1, name: "Zeeshan", email: "zeeshan@gmail.com" },
-    { id: 2, name: "Ali", email: "ali@gmail.com" },
-  ];
+  const [showForm, setShowForm] = useState(false)
+  const [selectedUser, setSelectedUser] = useState(null)
+  const [mode, setMode] = useState("add")
+
+  //users state (important)
+  const [users, setUsers] = useState([
+    {
+      id: 1,
+      name: "Zeeshan",
+      email: "zeeshan@gmail.com",
+      phone: "03001234567",
+      address: "Lahore",
+    },
+    {
+      id: 2,
+      name: "Ali",
+      email: "ali@gmail.com",
+      phone: "03007654321",
+      address: "Karachi",
+    },
+  ])
+
+  const openAddForm = () => {
+    setMode("add")
+    setSelectedUser(null)
+    setShowForm(true)
+  }
+
+  const openEditForm = (user) => {
+    setMode("edit")
+    setSelectedUser(user)
+    setShowForm(true)
+  }
+
+  const closeForm = () => {
+    setShowForm(false)
+    setSelectedUser(null)
+    setMode("add")
+  }
+
+  //POST API CALL
+  const addUser = async (data) => {
+    try {
+      const res = await axios.post(
+        "http://localhost:5000/api/users/register",
+        {
+          name: data.name,
+          email: data.email,
+          password: data.password,
+          role: "Admin",
+        }
+      )
+
+      
+      // table update
+      setUsers((prev) => [
+        ...prev,
+        {
+          id: prev.length + 1,
+          name: data.name,
+          email: data.email,
+          phone: data.password,
+          address: "Admin",
+        },
+      ])
+
+      setShowForm(false)
+
+    } catch (error) {
+      console.log("API Error:", error)
+    }
+  }
 
   return (
     <div className="p-6">
-      <div className="w-full max-w-sm">
-      <Input type="text" placeholder="Search..." />
-    </div>
-    
+
+      {/* Header */}
+      <div className="flex items-center justify-between gap-4 mb-6">
+
+        <div className="w-full max-w-sm">
+          <Input placeholder="Search..." />
+        </div>
+
+        <Button onClick={openAddForm}>
+          Add New
+        </Button>
+
+      </div>
+
+      {/* Form */}
+      {showForm && (
+        <AddUserForm
+          mode={mode}
+          userData={selectedUser}
+          onClose={closeForm}
+          onSubmitUser={addUser}
+        />
+      )}
+
+      {/* Table */}
       <Table>
+
         <TableHeader>
           <TableRow>
             <TableHead>ID</TableHead>
             <TableHead>Name</TableHead>
             <TableHead>Email</TableHead>
-             <TableHead>Phone</TableHead>
-              <TableHead>Address</TableHead>
+            <TableHead>Password</TableHead>
+            <TableHead>Role</TableHead>
             <TableHead>Action</TableHead>
           </TableRow>
         </TableHeader>
@@ -35,15 +135,36 @@ export default function UsersTable() {
         <TableBody>
           {users.map((user) => (
             <TableRow key={user.id}>
+
               <TableCell>{user.id}</TableCell>
               <TableCell>{user.name}</TableCell>
               <TableCell>{user.email}</TableCell>
-               <TableCell>{user.name}</TableCell>
-              <TableCell>{user.email}</TableCell>
+              <TableCell>{user.phone}</TableCell>
+              <TableCell>{user.address}</TableCell>
+
+              <TableCell className="flex gap-2">
+
+                <Button
+                  size="sm"
+                  onClick={() => openEditForm(user)}
+                >
+                  Edit
+                </Button>
+
+                <Button
+                  size="sm"
+                >
+                  Delete
+                </Button>
+
+              </TableCell>
+
             </TableRow>
           ))}
         </TableBody>
+
       </Table>
+
     </div>
-  );
+  )
 }
