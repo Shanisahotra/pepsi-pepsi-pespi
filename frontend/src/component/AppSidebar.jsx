@@ -52,6 +52,13 @@ export default function AppSidebar() {
 
               <SidebarMenuItem>
                 <SidebarMenuButton>
+                  <Users className="mr-2 h-4 w-4" />
+                  Outlets
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              <SidebarMenuItem>
+                <SidebarMenuButton>
                   <Settings className="mr-2 h-4 w-4" />
                   Settings
                 </SidebarMenuButton>

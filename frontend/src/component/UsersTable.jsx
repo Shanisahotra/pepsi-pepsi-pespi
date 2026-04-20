@@ -2,7 +2,12 @@
 
 import { useState, useEffect } from "react"
 import axios from "axios"
-
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -61,7 +66,6 @@ export default function UsersTable() {
 
     } catch (error) {
       console.log(error.response?.data)
-      console.log(error)
     }
   }
 
@@ -79,23 +83,11 @@ export default function UsersTable() {
           name: data.name,
           email: data.email,
           password: data.password,
-          role: "Admin",
+          role: data.role || "Admin",
         }
       )
 
-
-      // table update
-      setUsers((prev) => [
-        ...prev,
-        {
-          id: prev.length + 1,
-          name: data.name,
-          email: data.email,
-          phone: data.password,
-          address: "Admin",
-        },
-      ])
-
+      getUsers()
       setShowForm(false)
 
     } catch (error) {
@@ -166,15 +158,30 @@ export default function UsersTable() {
 
       </div>
 
-      {/* Form */}
-      {showForm && (
-        <AddUserForm
-          mode={mode}
-          userData={selectedUser}
-          onClose={closeForm}
-          onSubmitUser={mode === "add" ? addUser : updateUser}
-        />
-      )}
+      {/* Dialog Modal */}
+      <Dialog open={showForm} onOpenChange={setShowForm}>
+        <DialogContent className="sm:max-w-[900px] w-full p-6">
+          <DialogHeader>
+            <DialogTitle>
+              {mode === "edit"
+                ? "Edit User"
+                : "Add New User"}
+            </DialogTitle>
+          </DialogHeader>
+
+          <AddUserForm
+            mode={mode}
+            userData={selectedUser}
+            onClose={closeForm}
+            onSubmitUser={
+              mode === "add"
+                ? addUser
+                : updateUser
+            }
+          />
+        </DialogContent>
+      </Dialog>
+
 
       {/* Table */}
       <Table>
