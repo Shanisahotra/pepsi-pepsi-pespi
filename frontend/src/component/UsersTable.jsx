@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import axios from "axios"
 
 import {
@@ -23,23 +23,9 @@ export default function UsersTable() {
   const [selectedUser, setSelectedUser] = useState(null)
   const [mode, setMode] = useState("add")
 
-  //users state (important)
-  const [users, setUsers] = useState([
-    {
-      id: 1,
-      name: "Zeeshan",
-      email: "zeeshan@gmail.com",
-      phone: "03001234567",
-      address: "Lahore",
-    },
-    {
-      id: 2,
-      name: "Ali",
-      email: "ali@gmail.com",
-      phone: "03007654321",
-      address: "Karachi",
-    },
-  ])
+  const [users, setUsers] = useState([])
+
+  const token = localStorage.getItem("token");
 
   const openAddForm = () => {
     setMode("add")
@@ -59,6 +45,31 @@ export default function UsersTable() {
     setMode("add")
   }
 
+  // GET ALL USERS API
+  const getUsers = async () => {
+    try {
+      const res = await axios.get(
+        "http://localhost:5000/api/users/all-users",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      setUsers(res.data.users)
+
+    } catch (error) {
+      console.log(error.response?.data)
+      console.log(error)
+    }
+  }
+
+  useEffect(() => {
+    getUsers()
+  }, [])
+
+
   //POST API CALL
   const addUser = async (data) => {
     try {
@@ -72,7 +83,7 @@ export default function UsersTable() {
         }
       )
 
-      
+
       // table update
       setUsers((prev) => [
         ...prev,
@@ -91,6 +102,53 @@ export default function UsersTable() {
       console.log("API Error:", error)
     }
   }
+
+  // DELETE USER
+  const deleteUser = async (id) => {
+    try {
+      await axios.delete(
+        `http://localhost:5000/api/users/delete/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      setUsers((prev) => prev.filter((u) => u.id !== id))
+
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  // UPDATE USER
+  const updateUser = async (data) => {
+    const payload = {
+      name: data.name,
+      email: data.email,
+      role: data.role,
+    }
+
+    // only send password if user typed it
+    if (data.password && data.password.trim() !== "") {
+      payload.password = data.password
+    }
+
+    await axios.put(
+      `http://localhost:5000/api/users/update/${selectedUser.id}`,
+      payload,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    )
+
+    getUsers()
+    closeForm()
+  }
+
 
   return (
     <div className="p-6">
@@ -114,7 +172,7 @@ export default function UsersTable() {
           mode={mode}
           userData={selectedUser}
           onClose={closeForm}
-          onSubmitUser={addUser}
+          onSubmitUser={mode === "add" ? addUser : updateUser}
         />
       )}
 
@@ -139,8 +197,8 @@ export default function UsersTable() {
               <TableCell>{user.id}</TableCell>
               <TableCell>{user.name}</TableCell>
               <TableCell>{user.email}</TableCell>
-              <TableCell>{user.phone}</TableCell>
-              <TableCell>{user.address}</TableCell>
+              <TableCell>{user.password}</TableCell>
+              <TableCell>{user.role}</TableCell>
 
               <TableCell className="flex gap-2">
 
@@ -151,9 +209,7 @@ export default function UsersTable() {
                   Edit
                 </Button>
 
-                <Button
-                  size="sm"
-                >
+                <Button size="sm" onClick={() => deleteUser(user.id)}>
                   Delete
                 </Button>
 
