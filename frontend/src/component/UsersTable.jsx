@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 
 import AddUserForm from "@/components/ui/form/AddUserForm"
+import { blockUserApi, unblockUserApi } from "@/services/userService";
 
 export default function UsersTable() {
   const [showForm, setShowForm] = useState(false)
@@ -142,6 +143,19 @@ export default function UsersTable() {
   }
 
 
+// BLOCK
+const handleBlock = async (id) => {
+  await blockUserApi(id, token);
+  getUsers(); // refresh table
+};
+
+// UNBLOCK
+const handleUnblock = async (id) => {
+  await unblockUserApi(id, token);
+  getUsers();
+};
+
+
   return (
     <div className="p-6">
 
@@ -193,7 +207,8 @@ export default function UsersTable() {
             <TableHead>Email</TableHead>
             <TableHead>Password</TableHead>
             <TableHead>Role</TableHead>
-            <TableHead>Action</TableHead>
+             <TableHead>Status</TableHead>
+              <TableHead>Action</TableHead>
           </TableRow>
         </TableHeader>
 
@@ -206,7 +221,21 @@ export default function UsersTable() {
               <TableCell>{user.email}</TableCell>
               <TableCell>{user.password}</TableCell>
               <TableCell>{user.role}</TableCell>
+              <TableCell>
 
+                <Button
+                  size="sm"
+            onClick={() => handleBlock(user.id)}>
+                  Block
+                </Button>
+
+                <Button size="sm" onClick={() => handleUnblock(user.id)}>
+                  Unblock
+                </Button>
+
+
+              </TableCell>
+             
               <TableCell className="flex gap-2">
 
                 <Button
@@ -220,7 +249,11 @@ export default function UsersTable() {
                   Delete
                 </Button>
 
+
               </TableCell>
+          
+            
+              
 
             </TableRow>
           ))}

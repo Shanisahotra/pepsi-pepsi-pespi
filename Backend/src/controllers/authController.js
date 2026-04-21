@@ -138,6 +138,13 @@ export const login = async (req, res, next) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
+      //BLOCK CHECK HERE
+    if (user.isBlocked) {
+      return res.status(403).json({
+        message: "Your account is blocked. Contact admin.",
+      });
+    }
+
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
@@ -154,3 +161,5 @@ export const login = async (req, res, next) => {
     next(error);
   }
 };
+
+
