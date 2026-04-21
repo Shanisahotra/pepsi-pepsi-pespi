@@ -21,3 +21,13 @@ enum Role {
   SuperAdmin
   Admin
 }
+
+model Outlet {
+  id      Int    @id @default(autoincrement())
+  name    String
+  owner   String
+  email   String
+  phone   String
+  address String
+  createdAt DateTime @default(now())
+}
