@@ -30,4 +30,43 @@ model Outlet {
   phone   String
   address String
   createdAt DateTime @default(now())
+
+
+  orders    Order[]
+}
+
+
+model Product {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  price     Float
+  createdAt DateTime @default(now())
+
+  orderItems OrderItem[]
+}
+
+
+model Order {
+  id         Int      @id @default(autoincrement())
+  outletId   Int
+  subtotal   Float
+  discount   Float    @default(0)
+  total      Float
+  createdAt  DateTime @default(now())
+
+  outlet     Outlet   @relation(fields: [outletId], references: [id], onDelete: Cascade)
+  items      OrderItem[]
+}
+
+
+model OrderItem {
+  id         Int      @id @default(autoincrement())
+  orderId    Int
+  productId  Int
+  quantity   Int
+  price      Float
+  total      Float
+
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product    Product  @relation(fields: [productId], references: [id])
 }
