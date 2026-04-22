@@ -7,7 +7,7 @@ export default function useLogout() {
     localStorage.removeItem("token")
     localStorage.removeItem("user")
 
-    navigate("/") // go to login page
+    navigate("/")
   }
 
   return logout
