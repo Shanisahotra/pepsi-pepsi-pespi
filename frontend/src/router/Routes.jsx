@@ -5,6 +5,8 @@ import PrivateRoute from "./PrivateRoute"
 import UsersTable from "../component/UsersTable"
 import Dashboard from "../component/Dashboard"
 import OutletTable from "../component/OutletTable"
+import ProductsTable from "../component/ProductsTable"
+
 
 function Router() {
   return (
@@ -24,6 +26,8 @@ function Router() {
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="users" element={<UsersTable />} />
          <Route path="outlets" element={<OutletTable />} />
+         <Route path="products" element={<ProductsTable />} />
+
       </Route>
     </Routes>
   )

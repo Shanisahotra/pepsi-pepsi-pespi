@@ -58,7 +58,7 @@ export default function AppSidebar() {
               </SidebarMenuItem>
 
                <SidebarMenuItem>
-                <SidebarMenuButton>
+                <SidebarMenuButton onClick={() => navigate("/layout/products")}>
                   <Settings className="mr-2 h-4 w-4" />
                   Products
                 </SidebarMenuButton>
