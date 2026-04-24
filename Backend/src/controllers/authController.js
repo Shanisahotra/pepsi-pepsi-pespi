@@ -125,6 +125,48 @@ export const deleteUser = async (req, res, next) => {
   }
 }
 
+export const searchUsers = async (req, res, next) => {
+  try {
+    const { query = "" } = req.query
+
+    const OR = [
+      {
+        name: {
+          contains: query,
+          mode: "insensitive",
+        },
+      },
+      {
+        email: {
+          contains: query,
+          mode: "insensitive",
+        },
+      },
+    ]
+
+    if (query.toLowerCase() === "admin") {
+      OR.push({ role: "Admin" })
+    }
+
+    if (query.toLowerCase() === "user") {
+      OR.push({ role: "User" })
+    }
+
+    const users = await prisma.user.findMany({
+      where: { OR },
+      orderBy: { id: "desc" },
+    })
+
+    res.json({
+      message: "Search results",
+      users,
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+
 // LOGIN
 export const login = async (req, res, next) => {
   try {

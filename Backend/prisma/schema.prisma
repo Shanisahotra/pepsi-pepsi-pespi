@@ -11,7 +11,7 @@ model User {
   name      String
   email     String   @unique
   password  String
-  role      Role     @default(Admin)
+  role String @default("Admin")
   isBlocked Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt  DateTime @updatedAt

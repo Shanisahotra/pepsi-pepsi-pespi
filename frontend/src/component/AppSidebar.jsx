@@ -13,63 +13,108 @@ import {
   SidebarGroupContent,
 } from "@/components/ui/sidebar";
 
-import { Home, Users, Settings } from "lucide-react";
-import { useNavigate } from "react-router-dom"
+import {
+  Home,
+  Users,
+  Settings,
+  Store,
+  Package,
+} from "lucide-react";
+
+import { useNavigate, useLocation } from "react-router-dom";
 
 export default function AppSidebar() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const menus = [
+    {
+      title: "Dashboard",
+      icon: Home,
+      path: "/layout/dashboard",
+    },
+    {
+      title: "Users",
+      icon: Users,
+      path: "/layout/users",
+    },
+    {
+      title: "Outlets",
+      icon: Store,
+      path: "/layout/outlets",
+    },
+    {
+      title: "Products",
+      icon: Package,
+      path: "/layout/products",
+    },
+    {
+      title: "Settings",
+      icon: Settings,
+      path: "/layout/settings",
+    },
+  ];
+
   return (
-    <Sidebar>
+    <Sidebar className="border-r bg-white">
 
       {/* Header */}
-      <SidebarHeader>
-        <h2 className="text-xl font-bold px-2">Pepsi Admin</h2>
+      <SidebarHeader className="border-b px-4 py-5">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">
+            Pepsi Admin
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">
+            Management Panel
+          </p>
+        </div>
       </SidebarHeader>
 
       {/* Content */}
-      <SidebarContent>
+      <SidebarContent className="px-3 py-4">
 
-        {/* Main Menu */}
         <SidebarGroup>
-          <SidebarGroupLabel>Main</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider text-gray-400 px-2 mb-2">
+            Main Menu
+          </SidebarGroupLabel>
 
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="space-y-2">
 
-              <SidebarMenuItem>
-                <SidebarMenuButton onClick={() => navigate("/layout/dashboard")}>
-                  <Home className="mr-2 h-4 w-4" />
-                  Dashboard
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              {menus.map((item) => {
+                const Icon = item.icon;
+                const active = location.pathname === item.path;
 
-              <SidebarMenuItem>
-                <SidebarMenuButton onClick={() => navigate("/layout/users")}>
-                  <Users className="mr-2 h-4 w-4" />
-                  Users
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      onClick={() => navigate(item.path)}
+                      className={`
+                        w-full justify-start rounded-xl px-2 py-2 text-[14px]
+                        transition-all duration-200
+                        ${
+                          active
+                            ? "bg-gray-100 font-gray-50 shadow-sm"
+                            : "hover:bg-gray-50"
+                        }
+                      `}
+                    >
+                      <Icon
+                        className={`
+                          mr-3 h-5 w-5
+                          ${
+                            active
+                              ? "text-black"
+                              : "text-gray-500"
+                          }
+                        `}
+                      />
 
-              <SidebarMenuItem>
-                <SidebarMenuButton onClick={() => navigate("/layout/outlets")}>
-                  <Users className="mr-2 h-4 w-4" />
-                  Outlets
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-               <SidebarMenuItem>
-                <SidebarMenuButton onClick={() => navigate("/layout/products")}>
-                  <Settings className="mr-2 h-4 w-4" />
-                  Products
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              <SidebarMenuItem>
-                <SidebarMenuButton>
-                  <Settings className="mr-2 h-4 w-4" />
-                  Settings
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+                      <span>{item.title}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
 
             </SidebarMenu>
           </SidebarGroupContent>
@@ -78,8 +123,15 @@ export default function AppSidebar() {
       </SidebarContent>
 
       {/* Footer */}
-      <SidebarFooter>
-        <p className="text-sm text-gray-500 px-2">© 2026 Pepsi</p>
+      <SidebarFooter className="border-t px-4 py-4">
+        <div>
+          <p className="text-sm font-medium">
+            © 2026 Pepsi
+          </p>
+          <p className="text-xs text-gray-500 mt-1">
+            Admin Dashboard v1.0
+          </p>
+        </div>
       </SidebarFooter>
 
     </Sidebar>

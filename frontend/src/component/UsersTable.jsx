@@ -28,7 +28,7 @@ export default function UsersTable() {
   const [showForm, setShowForm] = useState(false)
   const [selectedUser, setSelectedUser] = useState(null)
   const [mode, setMode] = useState("add")
-
+  const [search, setSearch] = useState("")
   const [users, setUsers] = useState([])
 
   const token = localStorage.getItem("token");
@@ -142,28 +142,63 @@ export default function UsersTable() {
     closeForm()
   }
 
+  const searchUsers = async (searchText) => {
+    try {
+      const res = await axios.get(
+        `http://localhost:5000/api/users/search?query=${searchText}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
 
-// BLOCK
-const handleBlock = async (id) => {
-  await blockUserApi(id, token);
-  getUsers(); // refresh table
-};
+      setUsers(res.data.users)
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
-// UNBLOCK
-const handleUnblock = async (id) => {
-  await unblockUserApi(id, token);
-  getUsers();
-};
+  const handleBlock = async (id) => {
+    await blockUserApi(id, token)
+
+    setUsers((prev) =>
+      prev.map((u) =>
+        u.id === id ? { ...u, isBlocked: true } : u
+      )
+    )
+  }
+
+  const handleUnblock = async (id) => {
+    await unblockUserApi(id, token)
+
+    setUsers((prev) =>
+      prev.map((u) =>
+        u.id === id ? { ...u, isBlocked: false } : u
+      )
+    )
+  }
 
 
   return (
-    <div className="p-6">
+    <div className="">
+
+
+      <h1>Users Management</h1>
+
 
       {/* Header */}
-      <div className="flex items-center justify-between gap-4 mb-6">
-
+      <div className="flex items-center justify-between gap-4 mt-4 ">
         <div className="w-full max-w-sm">
-          <Input placeholder="Search..." />
+          <Input
+            placeholder="Search users..."
+            value={search}
+            onChange={(e) => {
+              const value = e.target.value
+              setSearch(value)
+              searchUsers(value)
+            }}
+          />
         </div>
 
         <Button onClick={openAddForm}>
@@ -205,10 +240,10 @@ const handleUnblock = async (id) => {
             <TableHead>ID</TableHead>
             <TableHead>Name</TableHead>
             <TableHead>Email</TableHead>
-            <TableHead>Password</TableHead>
+            {/* <TableHead>Password</TableHead> */}
             <TableHead>Role</TableHead>
-             <TableHead>Status</TableHead>
-              <TableHead>Action</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Action</TableHead>
           </TableRow>
         </TableHeader>
 
@@ -219,41 +254,42 @@ const handleUnblock = async (id) => {
               <TableCell>{user.id}</TableCell>
               <TableCell>{user.name}</TableCell>
               <TableCell>{user.email}</TableCell>
-              <TableCell>{user.password}</TableCell>
+              {/* <TableCell>{user.password}</TableCell> */}
               <TableCell>{user.role}</TableCell>
               <TableCell>
 
                 <Button
                   size="sm"
-            onClick={() => handleBlock(user.id)}>
-                  Block
+                  variant={user.isBlocked ? "default" : "destructive"}
+                  onClick={() =>
+                    user.isBlocked
+                      ? handleUnblock(user.id)
+                      : handleBlock(user.id)
+                  }
+                >
+                  {user.isBlocked ? "Unblock" : "Block"}
                 </Button>
-
-                <Button size="sm" onClick={() => handleUnblock(user.id)}>
-                  Unblock
-                </Button>
-
 
               </TableCell>
-             
+
               <TableCell className="flex gap-2">
 
                 <Button
-                  size="sm"
+                  size="sm" variant="destructive"
                   onClick={() => openEditForm(user)}
                 >
                   Edit
                 </Button>
 
-                <Button size="sm" onClick={() => deleteUser(user.id)}>
+                <Button size="sm" variant="destructive" onClick={() => deleteUser(user.id)}>
                   Delete
                 </Button>
 
 
               </TableCell>
-          
-            
-              
+
+
+
 
             </TableRow>
           ))}

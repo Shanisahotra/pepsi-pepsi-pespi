@@ -207,7 +207,7 @@ export default function OutletTable() {
               <TableCell>{outlet.address}</TableCell>
 
               <TableCell className="flex gap-2">
-                <Button size="sm" onClick={() => openEditForm(outlet)}>
+                <Button size="sm" variant="destructive"  onClick={() => openEditForm(outlet)}>
                   Edit
                 </Button>
                 <Button size="sm" variant="destructive" onClick={() => deleteUser(outlet.id)}>Delete</Button>

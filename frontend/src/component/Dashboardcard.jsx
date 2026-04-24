@@ -15,7 +15,7 @@ export default function DashboardCard({ title, value, icon }) {
       </CardHeader>
 
       <CardContent>
-        <h2 className="text-3xl font-bold">{value}</h2>
+        <h2 className="text-3xl text-gray-500">{value}</h2>
       </CardContent>
 
     </Card>
