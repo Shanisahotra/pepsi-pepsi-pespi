@@ -17,6 +17,17 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination"
+
+
 import { Edit, Trash2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -30,6 +41,9 @@ export default function UsersTable() {
   const [mode, setMode] = useState("add")
   const [search, setSearch] = useState("")
   const [users, setUsers] = useState([])
+  const [page, setPage] = useState(1)
+const [limit] = useState(5)
+const [totalPages, setTotalPages] = useState(1)
 
   const token = localStorage.getItem("token");
 
@@ -52,28 +66,43 @@ export default function UsersTable() {
   }
 
   // GET ALL USERS API
-  const getUsers = async () => {
-    try {
-      const res = await axios.get(
-        "http://localhost:5000/api/users/all-users",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      )
+ const getUsers = async (pageNumber = 1) => {
+  try {
+    const res = await axios.get(
+      `http://localhost:5000/api/users/all-users?page=${pageNumber}&limit=${limit}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    )
 
-      setUsers(res.data.users)
+    setUsers(res.data.users)
 
-    } catch (error) {
-      console.log(error.response?.data)
-    }
+    // backend should send total pages
+    setTotalPages(res.data.totalPages)
+
+  } catch (error) {
+    console.log(error)
   }
+}
 
-  useEffect(() => {
-    getUsers()
-  }, [])
+useEffect(() => {
+  getUsers(page)
+}, [page])
 
+
+const nextPage = () => {
+  if (page < totalPages) {
+    setPage(page + 1)
+  }
+}
+
+const prevPage = () => {
+  if (page > 1) {
+    setPage(page - 1)
+  }
+}
 
   //POST API CALL
   const addUser = async (data) => {
@@ -159,25 +188,25 @@ export default function UsersTable() {
     }
   }
 
-  const handleBlock = async (id) => {
-    await blockUserApi(id, token)
+const handleBlock = async (id) => {
+  await blockUserApi(id, token)
 
-    setUsers((prev) =>
-      prev.map((u) =>
-        u.id === id ? { ...u, isBlocked: true } : u
-      )
+  setUsers((prev) =>
+    prev.map((u) =>
+      u.id === id ? { ...u, isBlocked: true } : u
     )
-  }
+  )
+}
 
-  const handleUnblock = async (id) => {
-    await unblockUserApi(id, token)
+const handleUnblock = async (id) => {
+  await unblockUserApi(id, token)
 
-    setUsers((prev) =>
-      prev.map((u) =>
-        u.id === id ? { ...u, isBlocked: false } : u
-      )
+  setUsers((prev) =>
+    prev.map((u) =>
+      u.id === id ? { ...u, isBlocked: false } : u
     )
-  }
+  )
+}
 
 
   return (
@@ -258,30 +287,30 @@ export default function UsersTable() {
               <TableCell>{user.role}</TableCell>
               <TableCell>
 
-                <Button
-                  size="sm"
-                  variant={user.isBlocked ? "default" : "destructive"}
-                  onClick={() =>
-                    user.isBlocked
-                      ? handleUnblock(user.id)
-                      : handleBlock(user.id)
-                  }
-                >
-                  {user.isBlocked ? "Unblock" : "Block"}
-                </Button>
+             <Button
+  size="sm"
+  variant={user.isBlocked ? "default" : "destructive"}
+  onClick={() =>
+    user.isBlocked
+      ? handleUnblock(user.id)
+      : handleBlock(user.id)
+  }
+>
+  {user.isBlocked ? "Unblock" : "Block"}
+</Button>
 
               </TableCell>
 
               <TableCell className="flex gap-2">
 
                 <Button
-                  size="sm" variant="destructive"
+                  size="sm" variant="destructive" 
                   onClick={() => openEditForm(user)}
                 >
                   Edit
                 </Button>
 
-                <Button size="sm" variant="destructive" onClick={() => deleteUser(user.id)}>
+                <Button size="sm" variant="destructive"  onClick={() => deleteUser(user.id)}>
                   Delete
                 </Button>
 
@@ -296,6 +325,42 @@ export default function UsersTable() {
         </TableBody>
 
       </Table>
+
+      <div className="flex items-center justify-center mt-6">
+
+  <Pagination>
+    <PaginationContent>
+
+      <PaginationItem>
+        <PaginationPrevious
+          onClick={prevPage}
+          className={page === 1 ? "pointer-events-none opacity-50" : ""}
+        />
+      </PaginationItem>
+
+      {/* Page numbers */}
+      {Array.from({ length: totalPages }, (_, i) => (
+        <PaginationItem key={i}>
+          <PaginationLink
+            isActive={page === i + 1}
+            onClick={() => setPage(i + 1)}
+          >
+            {i + 1}
+          </PaginationLink>
+        </PaginationItem>
+      ))}
+
+      <PaginationItem>
+        <PaginationNext
+          onClick={nextPage}
+          className={page === totalPages ? "pointer-events-none opacity-50" : ""}
+        />
+      </PaginationItem>
+
+    </PaginationContent>
+  </Pagination>
+
+</div>
 
     </div>
   )
