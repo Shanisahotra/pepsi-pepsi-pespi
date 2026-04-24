@@ -33,7 +33,14 @@ export const register= async (req, res, next) => {
 
 export const getAllUsers = async (req, res, next) => {
   try {
+    const page = Number(req.query.page) || 1
+    const limit = Number(req.query.limit) || 5
+
+    const skip = (page - 1) * limit
+
     const users = await prisma.user.findMany({
+      skip,
+      take: limit,
       orderBy: {
         id: "desc",
       },
@@ -46,10 +53,16 @@ export const getAllUsers = async (req, res, next) => {
       },
     })
 
+    const totalUsers = await prisma.user.count()
+
     res.json({
       message: "Users fetched successfully",
       users,
+      totalUsers,
+      totalPages: Math.ceil(totalUsers / limit),
+      currentPage: page,
     })
+
   } catch (error) {
     next(error)
   }
