@@ -1,6 +1,7 @@
 import prisma from "../utils/prismaClient.js";
 import bcrypt from "bcryptjs";
 import generateToken from "../utils/generateToken.js";
+import redisClient from "../config/redis.js";
 
 // REGISTER
 export const register= async (req, res, next) => {
@@ -31,6 +32,7 @@ export const register= async (req, res, next) => {
   }
 };
 
+
 export const getAllUsers = async (req, res, next) => {
   try {
     const page = Number(req.query.page) || 1
@@ -38,29 +40,48 @@ export const getAllUsers = async (req, res, next) => {
 
     const skip = (page - 1) * limit
 
+    // unique cache key for each page + limit
+    const cacheKey = `users:page:${page}:limit:${limit}`
+
+    // 1. Check Redis first
+    const cachedUsers = await redisClient.get(cacheKey)
+
+    if (cachedUsers) {
+      return res.json({
+        message: "Users fetched from Redis cache",
+        ...JSON.parse(cachedUsers),
+      })
+    }
+
+    // 2. If no cache, fetch DB
     const users = await prisma.user.findMany({
       skip,
       take: limit,
       orderBy: {
         id: "desc",
       },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        createdAt: true,
-      },
+    
     })
 
     const totalUsers = await prisma.user.count()
 
-    res.json({
-      message: "Users fetched successfully",
+    const responseData = {
       users,
       totalUsers,
       totalPages: Math.ceil(totalUsers / limit),
       currentPage: page,
+    }
+
+    // 3. Store in Redis for 60 seconds
+    await redisClient.setEx(
+      cacheKey,
+      60,
+      JSON.stringify(responseData)
+    )
+
+    res.json({
+      message: "Users fetched successfully",
+      ...responseData,
     })
 
   } catch (error) {
