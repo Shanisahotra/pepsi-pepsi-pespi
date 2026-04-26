@@ -42,8 +42,8 @@ export default function UsersTable() {
   const [search, setSearch] = useState("")
   const [users, setUsers] = useState([])
   const [page, setPage] = useState(1)
-const [limit] = useState(5)
-const [totalPages, setTotalPages] = useState(1)
+  const [limit] = useState(5)
+  const [totalPages, setTotalPages] = useState(1)
 
   const token = localStorage.getItem("token");
 
@@ -66,43 +66,43 @@ const [totalPages, setTotalPages] = useState(1)
   }
 
   // GET ALL USERS API
- const getUsers = async (pageNumber = 1) => {
-  try {
-    const res = await axios.get(
-      `http://localhost:5000/api/users/all-users?page=${pageNumber}&limit=${limit}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    )
+  const getUsers = async (pageNumber = 1) => {
+    try {
+      const res = await axios.get(
+        `http://localhost:5000/api/users/all-users?page=${pageNumber}&limit=${limit}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
 
-    setUsers(res.data.users)
+      setUsers(res.data.users)
 
-    // backend should send total pages
-    setTotalPages(res.data.totalPages)
+      // backend should send total pages
+      setTotalPages(res.data.totalPages)
 
-  } catch (error) {
-    console.log(error)
+    } catch (error) {
+      console.log(error)
+    }
   }
-}
 
-useEffect(() => {
-  getUsers(page)
-}, [page])
+  useEffect(() => {
+    getUsers(page)
+  }, [page])
 
 
-const nextPage = () => {
-  if (page < totalPages) {
-    setPage(page + 1)
+  const nextPage = () => {
+    if (page < totalPages) {
+      setPage(page + 1)
+    }
   }
-}
 
-const prevPage = () => {
-  if (page > 1) {
-    setPage(page - 1)
+  const prevPage = () => {
+    if (page > 1) {
+      setPage(page - 1)
+    }
   }
-}
 
   //POST API CALL
   const addUser = async (data) => {
@@ -171,42 +171,47 @@ const prevPage = () => {
     closeForm()
   }
 
-  const searchUsers = async (searchText) => {
-    try {
-      const res = await axios.get(
-        `http://localhost:5000/api/users/search?query=${searchText}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      )
 
-      setUsers(res.data.users)
-    } catch (error) {
-      console.log(error)
-    }
+  const searchUsers = async (searchText) => {
+  try {
+    const res = await axios.get(
+      `http://localhost:5000/api/outlets/search?query=${searchText}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    )
+
+    setUsers(res.data.users) // 👈 correct based on your response
+
+    setPage(1) // optional reset pagination
+
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+
+  const handleBlock = async (id) => {
+    await blockUserApi(id, token)
+
+    setUsers((prev) =>
+      prev.map((u) =>
+        u.id === id ? { ...u, isBlocked: true } : u
+      )
+    )
   }
 
-const handleBlock = async (id) => {
-  await blockUserApi(id, token)
+  const handleUnblock = async (id) => {
+    await unblockUserApi(id, token)
 
-  setUsers((prev) =>
-    prev.map((u) =>
-      u.id === id ? { ...u, isBlocked: true } : u
+    setUsers((prev) =>
+      prev.map((u) =>
+        u.id === id ? { ...u, isBlocked: false } : u
+      )
     )
-  )
-}
-
-const handleUnblock = async (id) => {
-  await unblockUserApi(id, token)
-
-  setUsers((prev) =>
-    prev.map((u) =>
-      u.id === id ? { ...u, isBlocked: false } : u
-    )
-  )
-}
+  }
 
 
   return (
@@ -287,30 +292,30 @@ const handleUnblock = async (id) => {
               <TableCell>{user.role}</TableCell>
               <TableCell>
 
-             <Button
-  size="sm"
-  variant={user.isBlocked ? "default" : "destructive"}
-  onClick={() =>
-    user.isBlocked
-      ? handleUnblock(user.id)
-      : handleBlock(user.id)
-  }
->
-  {user.isBlocked ? "Unblock" : "Block"}
-</Button>
+                <Button
+                  size="sm"
+                  variant={user.isBlocked ? "default" : "destructive"}
+                  onClick={() =>
+                    user.isBlocked
+                      ? handleUnblock(user.id)
+                      : handleBlock(user.id)
+                  }
+                >
+                  {user.isBlocked ? "Unblock" : "Block"}
+                </Button>
 
               </TableCell>
 
               <TableCell className="flex gap-2">
 
                 <Button
-                  size="sm" variant="destructive" 
+                  size="sm" variant="destructive"
                   onClick={() => openEditForm(user)}
                 >
                   Edit
                 </Button>
 
-                <Button size="sm" variant="destructive"  onClick={() => deleteUser(user.id)}>
+                <Button size="sm" variant="destructive" onClick={() => deleteUser(user.id)}>
                   Delete
                 </Button>
 
@@ -328,39 +333,39 @@ const handleUnblock = async (id) => {
 
       <div className="flex items-center justify-center mt-6">
 
-  <Pagination>
-    <PaginationContent>
+        <Pagination>
+          <PaginationContent>
 
-      <PaginationItem>
-        <PaginationPrevious
-          onClick={prevPage}
-          className={page === 1 ? "pointer-events-none opacity-50" : ""}
-        />
-      </PaginationItem>
+            <PaginationItem>
+              <PaginationPrevious
+                onClick={prevPage}
+                className={page === 1 ? "pointer-events-none opacity-50" : ""}
+              />
+            </PaginationItem>
 
-      {/* Page numbers */}
-      {Array.from({ length: totalPages }, (_, i) => (
-        <PaginationItem key={i}>
-          <PaginationLink
-            isActive={page === i + 1}
-            onClick={() => setPage(i + 1)}
-          >
-            {i + 1}
-          </PaginationLink>
-        </PaginationItem>
-      ))}
+            {/* Page numbers */}
+            {Array.from({ length: totalPages }, (_, i) => (
+              <PaginationItem key={i}>
+                <PaginationLink
+                  isActive={page === i + 1}
+                  onClick={() => setPage(i + 1)}
+                >
+                  {i + 1}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
 
-      <PaginationItem>
-        <PaginationNext
-          onClick={nextPage}
-          className={page === totalPages ? "pointer-events-none opacity-50" : ""}
-        />
-      </PaginationItem>
+            <PaginationItem>
+              <PaginationNext
+                onClick={nextPage}
+                className={page === totalPages ? "pointer-events-none opacity-50" : ""}
+              />
+            </PaginationItem>
 
-    </PaginationContent>
-  </Pagination>
+          </PaginationContent>
+        </Pagination>
 
-</div>
+      </div>
 
     </div>
   )

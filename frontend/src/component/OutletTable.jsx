@@ -17,6 +17,17 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination"
+
+
 import { Edit, Trash2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -28,6 +39,10 @@ export default function OutletTable() {
   const [showForm, setShowForm] = useState(false)
   const [selectedOutlet, setSelectedOutlet] = useState(null)
   const [mode, setMode] = useState("add")
+  const [page, setPage] = useState(1)
+  const [limit] = useState(5)
+  const [totalPages, setTotalPages] = useState(1)
+   const [search, setSearch] = useState("")
 
   const token = localStorage.getItem("token");
 
@@ -69,10 +84,10 @@ export default function OutletTable() {
   }
 
 
-  const getOutlets = async () => {
+  const getOutlets = async (pageNumber = 1) => {
     try {
       const res = await axios.get(
-        "http://localhost:5000/api/outlets/all",
+        `http://localhost:5000/api/outlets/all?page=${pageNumber}&limit=${limit}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -82,15 +97,30 @@ export default function OutletTable() {
 
       setOutlets(res.data.outlets)
 
+      // backend total pages
+      setTotalPages(res.data.totalPages)
+
     } catch (error) {
       console.log(error)
     }
   }
 
+  // page change pe data fetch
   useEffect(() => {
-    getOutlets()
-  }, [])
+    getOutlets(page)
+  }, [page])
 
+  const nextPage = () => {
+    if (page < totalPages) {
+      setPage(page + 1)
+    }
+  }
+
+  const prevPage = () => {
+    if (page > 1) {
+      setPage(page - 1)
+    }
+  }
 
   const updateOutlet = async (data) => {
     try {
@@ -131,6 +161,23 @@ export default function OutletTable() {
     }
   }
 
+ 
+  const searchOutlets= async (searchText) => {
+    try {
+      const res = await axios.get(
+        `http://localhost:5000/api/outlets/search?query=${searchText}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      setOutlets(res.data.users)
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
 
 
@@ -142,7 +189,15 @@ export default function OutletTable() {
       <div className="flex items-center justify-between gap-4 mb-6">
 
         <div className="w-full max-w-sm">
-          <Input placeholder="Search..." />
+            <Input
+            placeholder="Search users..."
+            value={search}
+            onChange={(e) => {
+              const value = e.target.value
+              setSearch(value)
+              searchOutlets(value)
+            }}
+          />
         </div>
         <Button onClick={openAddForm}>
           Add New
@@ -206,7 +261,7 @@ export default function OutletTable() {
               <TableCell>{outlet.address}</TableCell>
 
               <TableCell className="flex gap-2">
-                <Button size="sm" variant="destructive"  onClick={() => openEditForm(outlet)}>
+                <Button size="sm" variant="destructive" onClick={() => openEditForm(outlet)}>
                   Edit
                 </Button>
                 <Button size="sm" variant="destructive" onClick={() => deleteUser(outlet.id)}>Delete</Button>
@@ -219,7 +274,41 @@ export default function OutletTable() {
 
 
       </Table>
+      <div className="flex items-center justify-center mt-6">
 
+        <Pagination>
+          <PaginationContent>
+
+            <PaginationItem>
+              <PaginationPrevious
+                onClick={prevPage}
+                className={page === 1 ? "pointer-events-none opacity-50" : ""}
+              />
+            </PaginationItem>
+
+            {/* Page numbers */}
+            {Array.from({ length: totalPages }, (_, i) => (
+              <PaginationItem key={i}>
+                <PaginationLink
+                  isActive={page === i + 1}
+                  onClick={() => setPage(i + 1)}
+                >
+                  {i + 1}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+
+            <PaginationItem>
+              <PaginationNext
+                onClick={nextPage}
+                className={page === totalPages ? "pointer-events-none opacity-50" : ""}
+              />
+            </PaginationItem>
+
+          </PaginationContent>
+        </Pagination>
+
+      </div>
     </div>
   )
 }
