@@ -5,7 +5,7 @@ export const createOrder = async (req, res, next) => {
   try {
     const { outletId, discount = 0, items } = req.body
 
-    if (!items || items.length === 0) {
+    if (!items || !Array.isArray(items) || items.length === 0) {
       return res.status(400).json({
         message: "Products required",
       })
@@ -25,37 +25,55 @@ export const createOrder = async (req, res, next) => {
     const orderItems = []
 
     for (const item of items) {
+      const qty = Number(item.quantity)
+
+      if (!qty || qty <= 0) {
+        return res.status(400).json({
+          message: "Invalid quantity",
+        })
+      }
+
       const product = await prisma.product.findUnique({
         where: { id: Number(item.productId) },
       })
 
-      if (!product) continue
+      // ❗ IMPORTANT FIX: DO NOT SKIP
+      if (!product) {
+        return res.status(404).json({
+          message: `Product not found: ${item.productId}`,
+        })
+      }
 
-      const total = product.price * item.quantity
+      const total = product.price * qty
       subtotal += total
 
       orderItems.push({
         productId: product.id,
-        quantity: item.quantity,
+        quantity: qty,
         price: product.price,
         total,
       })
     }
 
-    const grandTotal = subtotal - discount
+    if (orderItems.length === 0) {
+      return res.status(400).json({
+        message: "No valid products found",
+      })
+    }
+
+    const grandTotal = Math.max(0, subtotal - Number(discount))
 
     const order = await prisma.order.create({
       data: {
         outletId: Number(outletId),
         subtotal,
-        discount,
+        discount: Number(discount),
         total: grandTotal,
 
         items: {
           create: orderItems,
         },
       },
-
       include: {
         outlet: true,
         items: {
@@ -66,7 +84,7 @@ export const createOrder = async (req, res, next) => {
       },
     })
 
-    res.json({
+    res.status(201).json({
       message: "Order created successfully",
       order,
     })
@@ -75,7 +93,6 @@ export const createOrder = async (req, res, next) => {
     next(error)
   }
 }
-
 
 // GET ALL ORDERS
 export const getAllOrders = async (req, res, next) => {

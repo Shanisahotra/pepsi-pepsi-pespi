@@ -1,13 +1,14 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import axios from "axios"
+import axios, { AxiosError } from "axios"
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/components/ui/dialog"
+
 import {
   Table,
   TableBody,
@@ -20,30 +21,64 @@ import {
 import {
   Pagination,
   PaginationContent,
-  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination"
 
-
-import { Edit, Trash2 } from "lucide-react"
+import { toast } from "sonner"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import OutletForm from "@/components/ui/form/OutletForm"
 
+import OutletForm from "@/components/ui/form/OutletForm"
+import OrderForm from "@/components/ui/form/OrderForm"
+
+type Outlet = {
+  id: number
+  name: string
+  owner: string
+  email: string
+  phone: string
+  address: string
+}
+
+type OutletPayload = {
+  name: string
+  owner: string
+  email: string
+  phone: string
+  address: string
+}
+
+type OrderPayload = {
+  outletId: number
+  discount: number
+  items: {
+    productId: number
+    quantity: number
+  }[]
+}
+
+type OutletsResponse = {
+  outlets: Outlet[]
+  totalPages: number
+}
 
 export default function OutletTable() {
-  const [outlets, setOutlets] = useState([])
-  const [showForm, setShowForm] = useState(false)
-  const [selectedOutlet, setSelectedOutlet] = useState(null)
-  const [mode, setMode] = useState("add")
-  const [page, setPage] = useState(1)
-  const [limit] = useState(5)
-  const [totalPages, setTotalPages] = useState(1)
-   const [search, setSearch] = useState("")
+  const [outlets, setOutlets] = useState<Outlet[]>([])
+  const [showForm, setShowForm] = useState<boolean>(false)
+  const [selectedOutlet, setSelectedOutlet] = useState<Outlet | null>(null)
+  const [mode, setMode] = useState<"add" | "edit">("add")
 
+  const [page, setPage] = useState<number>(1)
+  const [limit] = useState<number>(5)
+  const [totalPages, setTotalPages] = useState<number>(1)
+
+  const [search, setSearch] = useState<string>("")
+
+  const [showOrderForm, setShowOrderForm] = useState<boolean>(false)
+  const [selectedOutletId, setSelectedOutletId] = useState<number | null>(null)
   const token = localStorage.getItem("token");
 
   const openAddForm = () => {
@@ -52,18 +87,24 @@ export default function OutletTable() {
     setShowForm(true)
   }
 
-  const openEditForm = (outlet) => {
+  const openEditForm = (outlet: Outlet) => {
     setMode("edit")
     setSelectedOutlet(outlet)
     setShowForm(true)
   }
+
   const closeForm = () => {
     setShowForm(false)
     setSelectedOutlet(null)
     setMode("add")
   }
 
-  const addOutlet = async (data) => {
+  const openOrderForm = (outlet: Outlet) => {
+    setSelectedOutletId(outlet.id)
+    setShowOrderForm(true)
+  }
+
+  const addOutlet = async (data: OutletPayload) => {
     try {
       await axios.post(
         "http://localhost:5000/api/outlets/create",
@@ -75,18 +116,18 @@ export default function OutletTable() {
         }
       )
 
-      getOutlets()
+      toast.success("Outlet Added")
+      getOutlets(page)
       closeForm()
-
     } catch (error) {
       console.log(error)
+      toast.error("Failed to add outlet")
     }
   }
 
-
-  const getOutlets = async (pageNumber = 1) => {
+  const getOutlets = async (pageNumber: number = 1) => {
     try {
-      const res = await axios.get(
+      const res = await axios.get<OutletsResponse>(
         `http://localhost:5000/api/outlets/all?page=${pageNumber}&limit=${limit}`,
         {
           headers: {
@@ -96,16 +137,12 @@ export default function OutletTable() {
       )
 
       setOutlets(res.data.outlets)
-
-      // backend total pages
       setTotalPages(res.data.totalPages)
-
     } catch (error) {
       console.log(error)
     }
   }
 
-  // page change pe data fetch
   useEffect(() => {
     getOutlets(page)
   }, [page])
@@ -122,7 +159,9 @@ export default function OutletTable() {
     }
   }
 
-  const updateOutlet = async (data) => {
+  const updateOutlet = async (data: OutletPayload) => {
+    if (!selectedOutlet) return
+
     try {
       await axios.put(
         `http://localhost:5000/api/outlets/update/${selectedOutlet.id}`,
@@ -134,16 +173,16 @@ export default function OutletTable() {
         }
       )
 
-      getOutlets()
+      toast.success("Outlet Updated")
+      getOutlets(page)
       closeForm()
-
     } catch (error) {
       console.log(error)
+      toast.error("Failed to update outlet")
     }
   }
 
-
-  const deleteUser = async (id) => {
+  const deleteUser = async (id: number) => {
     try {
       await axios.delete(
         `http://localhost:5000/api/outlets/delete/${id}`,
@@ -154,15 +193,15 @@ export default function OutletTable() {
         }
       )
 
-      getOutlets()
-
+      toast.success("Outlet Deleted")
+      getOutlets(page)
     } catch (error) {
       console.log(error)
+      toast.error("Failed to delete outlet")
     }
   }
 
- 
-  const searchOutlets= async (searchText) => {
+  const searchOutlets = async (searchText: string) => {
     try {
       const res = await axios.get(
         `http://localhost:5000/api/outlets/search?query=${searchText}`,
@@ -179,8 +218,28 @@ export default function OutletTable() {
     }
   }
 
+  const createOrder = async (payload: OrderPayload) => {
+    try {
+      await axios.post(
+        "http://localhost:5000/api/orders/create",
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
 
+      toast.success("Order Created")
+      setShowOrderForm(false)
+    } catch (error) {
+      const err = error as AxiosError<any>
 
+      toast.error(
+        err.response?.data?.message || "Failed to create order"
+      )
+    }
+  }
 
   return (
     <div className="p-6">
@@ -189,7 +248,7 @@ export default function OutletTable() {
       <div className="flex items-center justify-between gap-4 mb-6">
 
         <div className="w-full max-w-sm">
-            <Input
+          <Input
             placeholder="Search users..."
             value={search}
             onChange={(e) => {
@@ -199,20 +258,23 @@ export default function OutletTable() {
             }}
           />
         </div>
+
         <Button onClick={openAddForm}>
           Add New
         </Button>
 
       </div>
 
-
-      {/* Dialog Modal */}
-      <Dialog open={showForm}
+      {/* Outlet Modal */}
+      <Dialog
+        open={showForm}
         onOpenChange={(open) => {
           setShowForm(open)
           if (!open) closeForm()
-        }}>
+        }}
+      >
         <DialogContent className="sm:max-w-[900px] w-full p-6">
+
           <DialogHeader>
             <DialogTitle>
               {mode === "edit"
@@ -226,13 +288,36 @@ export default function OutletTable() {
             outletData={selectedOutlet}
             onClose={closeForm}
             onSubmitOutlet={
-              mode === "add" ? addOutlet : updateOutlet
+              mode === "add"
+                ? addOutlet
+                : updateOutlet
             }
           />
+
         </DialogContent>
       </Dialog>
 
+      {/* Order Modal */}
+      <Dialog
+        open={showOrderForm}
+        onOpenChange={setShowOrderForm}
+      >
+        <DialogContent className="sm:max-w-[900px] w-full p-6">
 
+          <DialogHeader>
+            <DialogTitle>
+              Create Order
+            </DialogTitle>
+          </DialogHeader>
+
+          <OrderForm
+            outletId={selectedOutletId}
+            onClose={() => setShowOrderForm(false)}
+            onSubmitOrder={createOrder}
+          />
+
+        </DialogContent>
+      </Dialog>
 
       {/* Table */}
       <Table>
@@ -245,6 +330,7 @@ export default function OutletTable() {
             <TableHead>Email</TableHead>
             <TableHead>Phone</TableHead>
             <TableHead>Address</TableHead>
+            <TableHead>Order</TableHead>
             <TableHead>Action</TableHead>
           </TableRow>
         </TableHeader>
@@ -260,20 +346,49 @@ export default function OutletTable() {
               <TableCell>{outlet.phone}</TableCell>
               <TableCell>{outlet.address}</TableCell>
 
+              <TableCell>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={() =>
+                    openOrderForm(outlet)
+                  }
+                >
+                  Order
+                </Button>
+              </TableCell>
+
               <TableCell className="flex gap-2">
-                <Button size="sm" variant="destructive" onClick={() => openEditForm(outlet)}>
+
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={() =>
+                    openEditForm(outlet)
+                  }
+                >
                   Edit
                 </Button>
-                <Button size="sm" variant="destructive" onClick={() => deleteUser(outlet.id)}>Delete</Button>
+
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={() =>
+                    deleteUser(outlet.id)
+                  }
+                >
+                  Delete
+                </Button>
+
               </TableCell>
 
             </TableRow>
           ))}
         </TableBody>
 
-
-
       </Table>
+
+      {/* Pagination */}
       <div className="flex items-center justify-center mt-6">
 
         <Pagination>
@@ -282,26 +397,38 @@ export default function OutletTable() {
             <PaginationItem>
               <PaginationPrevious
                 onClick={prevPage}
-                className={page === 1 ? "pointer-events-none opacity-50" : ""}
+                className={
+                  page === 1
+                    ? "pointer-events-none opacity-50"
+                    : ""
+                }
               />
             </PaginationItem>
 
-            {/* Page numbers */}
-            {Array.from({ length: totalPages }, (_, i) => (
-              <PaginationItem key={i}>
-                <PaginationLink
-                  isActive={page === i + 1}
-                  onClick={() => setPage(i + 1)}
-                >
-                  {i + 1}
-                </PaginationLink>
-              </PaginationItem>
-            ))}
+            {Array.from(
+              { length: totalPages },
+              (_, i) => (
+                <PaginationItem key={i}>
+                  <PaginationLink
+                    isActive={page === i + 1}
+                    onClick={() =>
+                      setPage(i + 1)
+                    }
+                  >
+                    {i + 1}
+                  </PaginationLink>
+                </PaginationItem>
+              )
+            )}
 
             <PaginationItem>
               <PaginationNext
                 onClick={nextPage}
-                className={page === totalPages ? "pointer-events-none opacity-50" : ""}
+                className={
+                  page === totalPages
+                    ? "pointer-events-none opacity-50"
+                    : ""
+                }
               />
             </PaginationItem>
 
@@ -309,6 +436,7 @@ export default function OutletTable() {
         </Pagination>
 
       </div>
+
     </div>
   )
 }

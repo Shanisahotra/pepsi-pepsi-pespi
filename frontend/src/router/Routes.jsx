@@ -4,6 +4,7 @@ import Layout from "@/component/layout"
 import PrivateRoute from "./PrivateRoute"
 import UsersTable from "../component/UsersTable"
 import Dashboard from "../component/Dashboard"
+// import OutletTable from "../component/OutletTable"
 import OutletTable from "../component/OutletTable"
 import ProductsTable from "../component/ProductsTable"
 

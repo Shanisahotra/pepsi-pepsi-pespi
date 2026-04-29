@@ -5,22 +5,48 @@ import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
+import {
+  Field,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field"
+
+type OutletFormValues = {
+  name: string
+  owner: string
+  email: string
+  phone: string
+  address: string
+}
+
+type OutletFormProps = {
+  mode?: "add" | "edit"
+  outletData?: OutletFormValues | null
+  onClose?: () => void
+  onSubmitOutlet: (
+    data: OutletFormValues
+  ) => Promise<void>
+}
 
 export default function OutletForm({
   mode = "add",
-  outletData,
+  outletData = null,
   onClose,
-   onSubmitOutlet,
-}) {
+  onSubmitOutlet,
+}: OutletFormProps) {
   const {
     register,
     handleSubmit,
     reset,
     formState: { isSubmitting },
-  } = useForm({
+  } = useForm<OutletFormValues>({
     defaultValues: {
       name: "",
       owner: "",
@@ -36,33 +62,37 @@ export default function OutletForm({
     } else {
       reset({
         name: "",
-      owner: "",
-      email: "",
-      phone: "",
-      address: "",
+        owner: "",
+        email: "",
+        phone: "",
+        address: "",
       })
     }
   }, [mode, outletData, reset])
 
-  async function onSubmit(data:any) {
-  console.log(data)
+  const onSubmit = async (
+    data: OutletFormValues
+  ) => {
+    try {
+      await onSubmitOutlet(data)
 
-  try {
-    if (mode === "add") {
-      await onSubmitOutlet(data)   //API call here
-      toast.success("Outlet Added Successfully")
-    } else {
-      toast.success("Outlet Updated Successfully")
+      if (mode === "add") {
+        toast.success(
+          "Outlet Added Successfully"
+        )
+      } else {
+        toast.success(
+          "Outlet Updated Successfully"
+        )
+      }
+
+      reset()
+      onClose?.()
+    } catch (error) {
+      console.log(error)
+      toast.error("Something went wrong")
     }
-
-    reset()
-    onClose?.()
-
-  } catch (error) {
-    console.log(error)
-    toast.error("Something went wrong")
   }
-}
 
   return (
     <div className="p-6 flex justify-center">
@@ -70,39 +100,69 @@ export default function OutletForm({
 
         <CardHeader>
           <CardTitle className="text-2xl font-bold">
-            {mode === "edit" ? "Edit Outlet" : "Add New Outlet"}
+            {mode === "edit"
+              ? "Edit Outlet"
+              : "Add New Outlet"}
           </CardTitle>
         </CardHeader>
 
         <CardContent>
-
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="space-y-6"
+          >
             <FieldGroup>
 
               <Field>
-                <FieldLabel>Name</FieldLabel>
-                <Input {...register("name", { required: true })} />
+                <FieldLabel>
+                  Name
+                </FieldLabel>
+                <Input
+                  {...register("name", {
+                    required: true,
+                  })}
+                />
               </Field>
 
               <Field>
-                <FieldLabel>Owner Name</FieldLabel>
-                <Input {...register("owner", { required: true })} />
+                <FieldLabel>
+                  Owner Name
+                </FieldLabel>
+                <Input
+                  {...register("owner", {
+                    required: true,
+                  })}
+                />
               </Field>
 
               <Field>
-                <FieldLabel>Email</FieldLabel>
-                <Input {...register("email", { required: true })} />
+                <FieldLabel>
+                  Email
+                </FieldLabel>
+                <Input
+                  type="email"
+                  {...register("email", {
+                    required: true,
+                  })}
+                />
               </Field>
 
               <Field>
-                <FieldLabel>Phone</FieldLabel>
-                <Input {...register("phone")} />
+                <FieldLabel>
+                  Phone
+                </FieldLabel>
+                <Input
+                  {...register("phone")}
+                />
               </Field>
 
               <Field>
-                <FieldLabel>Address</FieldLabel>
-                <Input {...register("address")} />
+                <FieldLabel>
+                  Address
+                </FieldLabel>
+                <Input
+                  {...register("address")}
+                />
               </Field>
 
             </FieldGroup>
@@ -114,7 +174,13 @@ export default function OutletForm({
                 className="w-full"
                 disabled={isSubmitting}
               >
-                {mode === "edit" ? "Update Outlet" : "Add Outlet"}
+                {isSubmitting
+                  ? mode === "edit"
+                    ? "Updating..."
+                    : "Adding..."
+                  : mode === "edit"
+                  ? "Update Outlet"
+                  : "Add Outlet"}
               </Button>
 
               <Button
@@ -127,9 +193,7 @@ export default function OutletForm({
               </Button>
 
             </div>
-
           </form>
-
         </CardContent>
 
       </Card>
