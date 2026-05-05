@@ -13,7 +13,6 @@ import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 type Product = {
   id: number
   name: string
-  price: number
 }
 
 type Item = {
@@ -230,7 +229,7 @@ export default function OrderForm({
                     type="number"
                     placeholder="Quantity"
                     value={item.quantity}
-                    onChange={(e:any) =>
+                    onChange={(e: any) =>
                       handleItemChange(
                         index,
                         "quantity",

@@ -33,6 +33,7 @@ import { Button } from "@/components/ui/button"
 
 import OutletForm from "@/components/ui/form/OutletForm"
 import OrderForm from "@/components/ui/form/OrderForm"
+import OutletInvoice from "@/components/ui/Invoices/OutletInvoice";
 
 type Outlet = {
   id: number
@@ -81,6 +82,10 @@ export default function OutletTable() {
   const [selectedOutletId, setSelectedOutletId] = useState<number | null>(null)
   const token = localStorage.getItem("token");
 
+  const [showInvoice, setShowInvoice] = useState(false);
+  const [selectedInvoiceOutlet, setSelectedInvoiceOutlet] = useState<Outlet | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+
   const openAddForm = () => {
     setMode("add")
     setSelectedOutlet(null)
@@ -103,6 +108,27 @@ export default function OutletTable() {
     setSelectedOutletId(outlet.id)
     setShowOrderForm(true)
   }
+
+
+
+  const openInvoice = async (outlet: Outlet) => {
+  try {
+    const res = await axios.get(
+      `http://localhost:5000/api/orders/${outlet.id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    setSelectedOrder(res.data.order); // adjust if backend key differs
+    setShowInvoice(true);
+  } catch (error) {
+    console.log(error);
+    toast.error("Failed to load invoice");
+  }
+};
 
   const addOutlet = async (data: OutletPayload) => {
     try {
@@ -251,7 +277,7 @@ export default function OutletTable() {
           <Input
             placeholder="Search users..."
             value={search}
-            onChange={(e) => {
+            onChange={(e: any) => {
               const value = e.target.value
               setSearch(value)
               searchOutlets(value)
@@ -268,7 +294,7 @@ export default function OutletTable() {
       {/* Outlet Modal */}
       <Dialog
         open={showForm}
-        onOpenChange={(open) => {
+        onOpenChange={(open: any) => {
           setShowForm(open)
           if (!open) closeForm()
         }}
@@ -319,6 +345,20 @@ export default function OutletTable() {
         </DialogContent>
       </Dialog>
 
+    <Dialog open={showInvoice} onOpenChange={setShowInvoice}>
+  <DialogContent className="w-[90vw] max-w-6xl">
+
+    <DialogHeader>
+      <DialogTitle>Outlet Invoice</DialogTitle>
+    </DialogHeader>
+
+    {selectedOrder && (
+      <OutletInvoice order={selectedOrder} />
+    )}
+
+  </DialogContent>
+</Dialog>
+
       {/* Table */}
       <Table>
 
@@ -331,6 +371,7 @@ export default function OutletTable() {
             <TableHead>Phone</TableHead>
             <TableHead>Address</TableHead>
             <TableHead>Order</TableHead>
+            <TableHead>View</TableHead>
             <TableHead>Action</TableHead>
           </TableRow>
         </TableHeader>
@@ -357,31 +398,43 @@ export default function OutletTable() {
                   Order
                 </Button>
               </TableCell>
+<TableCell>
+  <div className="flex gap-2">
 
-              <TableCell className="flex gap-2">
+   <TableCell>
+  <Button
+    size="sm"
+    variant="secondary"
+    onClick={() => openInvoice(outlet)}
+  >
+    View
+  </Button>
+</TableCell>
 
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  onClick={() =>
-                    openEditForm(outlet)
-                  }
-                >
-                  Edit
-                </Button>
 
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  onClick={() =>
-                    deleteUser(outlet.id)
-                  }
-                >
-                  Delete
-                </Button>
+  </div>
+</TableCell>
 
-              </TableCell>
+<TableCell>
+  <div className="flex gap-2">
 
+    <Button
+      size="sm"
+      variant="destructive"
+      onClick={() => openEditForm(outlet)}
+    >
+      Edit
+    </Button>
+
+    <Button
+      size="sm"
+      variant="destructive"
+      onClick={() => deleteUser(outlet.id)}
+    >
+      Delete
+    </Button>
+  </div>
+  </TableCell>
             </TableRow>
           ))}
         </TableBody>
