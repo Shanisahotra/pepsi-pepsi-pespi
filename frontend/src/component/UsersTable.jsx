@@ -171,27 +171,22 @@ export default function UsersTable() {
     closeForm()
   }
 
-
   const searchUsers = async (searchText) => {
-  try {
-    const res = await axios.get(
-      `http://localhost:5000/api/outlets/search?query=${searchText}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    )
+    try {
+      const res = await axios.get(
+        `http://localhost:5000/api/users/search?query=${searchText}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
 
-    setUsers(res.data.users) // 👈 correct based on your response
-
-    setPage(1) // optional reset pagination
-
-  } catch (error) {
-    console.log(error)
+      setUsers(res.data.users)
+    } catch (error) {
+      console.log(error)
+    }
   }
-}
-
 
   const handleBlock = async (id) => {
     await blockUserApi(id, token)

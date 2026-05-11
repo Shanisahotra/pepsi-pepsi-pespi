@@ -83,7 +83,6 @@ export default function OutletTable() {
   const token = localStorage.getItem("token");
 
   const [showInvoice, setShowInvoice] = useState(false);
-  const [selectedInvoiceOutlet, setSelectedInvoiceOutlet] = useState<Outlet | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
 
   const openAddForm = () => {
@@ -112,23 +111,23 @@ export default function OutletTable() {
 
 
   const openInvoice = async (outlet: Outlet) => {
-  try {
-    const res = await axios.get(
-      `http://localhost:5000/api/orders/${outlet.id}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    try {
+      const res = await axios.get(
+        `http://localhost:5000/api/orders/${outlet.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-    setSelectedOrder(res.data.order); // adjust if backend key differs
-    setShowInvoice(true);
-  } catch (error) {
-    console.log(error);
-    toast.error("Failed to load invoice");
-  }
-};
+      setSelectedOrder(res.data.order); // adjust if backend key differs
+      setShowInvoice(true);
+    } catch (error) {
+      console.log(error);
+      toast.error("Failed to load invoice");
+    }
+  };
 
   const addOutlet = async (data: OutletPayload) => {
     try {
@@ -268,10 +267,10 @@ export default function OutletTable() {
   }
 
   return (
-    <div className="p-6">
-
+    <div>
+      <h1>Outlets Management</h1>
       {/* Header */}
-      <div className="flex items-center justify-between gap-4 mb-6">
+      <div className="flex items-center justify-between gap-4 mt-4">
 
         <div className="w-full max-w-sm">
           <Input
@@ -289,6 +288,11 @@ export default function OutletTable() {
           Add New
         </Button>
 
+      </div>
+
+      <div className="mt-6">
+        <Button>Import Excel</Button>
+        <Button>Export Excel</Button>
       </div>
 
       {/* Outlet Modal */}
@@ -345,22 +349,22 @@ export default function OutletTable() {
         </DialogContent>
       </Dialog>
 
-    <Dialog open={showInvoice} onOpenChange={setShowInvoice}>
-  <DialogContent className="w-[90vw] max-w-6xl">
+      <Dialog open={showInvoice} onOpenChange={setShowInvoice}>
+        <DialogContent className="w-[90vw] max-w-6xl">
 
-    <DialogHeader>
-      <DialogTitle>Outlet Invoice</DialogTitle>
-    </DialogHeader>
+          <DialogHeader>
+            <DialogTitle>Outlet Invoice</DialogTitle>
+          </DialogHeader>
 
-    {selectedOrder && (
-      <OutletInvoice order={selectedOrder} />
-    )}
+          {selectedOrder && (
+            <OutletInvoice order={selectedOrder} />
+          )}
 
-  </DialogContent>
-</Dialog>
+        </DialogContent>
+      </Dialog>
 
       {/* Table */}
-      <Table>
+      <Table className="mt-6">
 
         <TableHeader>
           <TableRow>
@@ -398,43 +402,43 @@ export default function OutletTable() {
                   Order
                 </Button>
               </TableCell>
-<TableCell>
-  <div className="flex gap-2">
+              <TableCell>
+                <div className="flex gap-2">
 
-   <TableCell>
-  <Button
-    size="sm"
-    variant="secondary"
-    onClick={() => openInvoice(outlet)}
-  >
-    View
-  </Button>
-</TableCell>
+                  <TableCell>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => openInvoice(outlet)}
+                    >
+                      View
+                    </Button>
+                  </TableCell>
 
 
-  </div>
-</TableCell>
+                </div>
+              </TableCell>
 
-<TableCell>
-  <div className="flex gap-2">
+              <TableCell>
+                <div className="flex gap-2">
 
-    <Button
-      size="sm"
-      variant="destructive"
-      onClick={() => openEditForm(outlet)}
-    >
-      Edit
-    </Button>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => openEditForm(outlet)}
+                  >
+                    Edit
+                  </Button>
 
-    <Button
-      size="sm"
-      variant="destructive"
-      onClick={() => deleteUser(outlet.id)}
-    >
-      Delete
-    </Button>
-  </div>
-  </TableCell>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => deleteUser(outlet.id)}
+                  >
+                    Delete
+                  </Button>
+                </div>
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>

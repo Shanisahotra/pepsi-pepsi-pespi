@@ -37,7 +37,6 @@ export const createOrder = async (req, res, next) => {
         where: { id: Number(item.productId) },
       })
 
-      // ❗ IMPORTANT FIX: DO NOT SKIP
       if (!product) {
         return res.status(404).json({
           message: `Product not found: ${item.productId}`,

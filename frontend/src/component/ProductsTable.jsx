@@ -133,10 +133,11 @@ export default function ProductsTable() {
 
 
     return (
-        <div className="p-6">
+        <div>
 
-            {/* Header */}
-            <div className="flex items-center justify-between gap-4 mb-6">
+            <h1>Products Management</h1>
+
+            <div className="flex items-center justify-between gap-4 mt-4">
 
                 <div className="w-full max-w-sm">
                     <Input placeholder="Search..." />
@@ -146,7 +147,10 @@ export default function ProductsTable() {
                 </Button>
 
             </div>
-
+  <div className="mt-6">
+        <Button>Import Excel</Button>
+        <Button>Export Excel</Button>
+      </div>
 
             {/* Dialog Modal */}
             <Dialog open={showForm}
@@ -177,7 +181,7 @@ export default function ProductsTable() {
 
 
             {/* Table */}
-            <Table>
+            <Table className="mt-6">
 
                 <TableHeader>
                     <TableRow>

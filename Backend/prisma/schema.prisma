@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
 datasource db {
@@ -11,7 +12,7 @@ model User {
   name      String
   email     String   @unique
   password  String
-  role String @default("Admin")
+  role       Role     @default(Admin)
   isBlocked Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt  DateTime @updatedAt

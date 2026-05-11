@@ -19,6 +19,7 @@ import {
   Settings,
   Store,
   Package,
+  Warehouse
 } from "lucide-react";
 
 import { useNavigate, useLocation } from "react-router-dom";
@@ -47,6 +48,11 @@ export default function AppSidebar() {
       title: "Products",
       icon: Package,
       path: "/layout/products",
+    },
+    {
+      title: "Stock",
+      icon: Warehouse,
+      path: "/layout/stock",
     },
     {
       title: "Settings",
