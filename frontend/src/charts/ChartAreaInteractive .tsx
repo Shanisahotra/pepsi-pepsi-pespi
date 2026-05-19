@@ -143,11 +143,13 @@ export function ChartAreaInteractive() {
     const date = new Date(item.date)
     const referenceDate = new Date("2024-06-30")
     let daysToSubtract = 90
-    if (timeRange === "30d") {
-      daysToSubtract = 30
-    } else if (timeRange === "7d") {
-      daysToSubtract = 7
-    }
+   if (timeRange === "30d") {
+    daysToSubtract = 30
+  } else if (timeRange === "7d") {
+    daysToSubtract = 7
+  } else if (timeRange === "1d") {
+    daysToSubtract = 1
+  }
     const startDate = new Date(referenceDate)
     startDate.setDate(startDate.getDate() - daysToSubtract)
     return date >= startDate
@@ -178,6 +180,9 @@ export function ChartAreaInteractive() {
             </SelectItem>
             <SelectItem value="7d" className="rounded-lg">
               Last 7 days
+            </SelectItem>
+             <SelectItem value="1d" className="rounded-lg">
+              today
             </SelectItem>
           </SelectContent>
         </Select>

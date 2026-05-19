@@ -23,43 +23,58 @@ import {
 } from "lucide-react";
 
 import { useNavigate, useLocation } from "react-router-dom";
+import { getRole } from "../utils/auth";
 
 export default function AppSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const role = getRole(); //GET ROLE
+
+  //MENUS WITH RBAC
   const menus = [
     {
       title: "Dashboard",
       icon: Home,
       path: "/layout/dashboard",
+      roles: ["SuperAdmin", "Admin"],
     },
     {
       title: "Users",
       icon: Users,
       path: "/layout/users",
+      roles: ["SuperAdmin"], //ONLY SUPERADMIN
     },
     {
       title: "Outlets",
       icon: Store,
       path: "/layout/outlets",
+      roles: ["SuperAdmin", "Admin"],
     },
     {
       title: "Products",
       icon: Package,
       path: "/layout/products",
+      roles: ["SuperAdmin", "Admin"],
     },
     {
       title: "Stock",
       icon: Warehouse,
       path: "/layout/stock",
+      roles: ["SuperAdmin", "Admin"],
     },
     {
       title: "Settings",
       icon: Settings,
       path: "/layout/settings",
+      roles: ["SuperAdmin", "Admin"],
     },
   ];
+
+  // FILTER MENUS BASED ON ROLE
+  const filteredMenus = menus.filter((item) =>
+    item.roles.includes(role)
+  );
 
   return (
     <Sidebar className="border-r bg-white">
@@ -87,7 +102,8 @@ export default function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu className="space-y-2">
 
-              {menus.map((item) => {
+              {/*USE FILTERED MENUS */}
+              {filteredMenus.map((item) => {
                 const Icon = item.icon;
                 const active = location.pathname === item.path;
 

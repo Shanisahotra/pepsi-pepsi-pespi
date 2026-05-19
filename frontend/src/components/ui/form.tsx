@@ -37,46 +37,43 @@ export function LoginForm() {
 
   const { formState: { isSubmitting },} = form
 
-  async function onSubmit(data: z.infer<typeof formSchema>) {
-    try {
-      const response = await axios.post(
-        "http://localhost:5000/api/users/login",
-        {
-          email: data.email,
-          password: data.password,
-        }
-      )
-
-      // Save token if exists
-      if (response.data?.token) {
-        localStorage.setItem("token", response.data.token)
+   async function onSubmit(data: z.infer<typeof formSchema>) {
+  try {
+    const response = await axios.post(
+      "http://localhost:5000/api/users/login",
+      {
+        email: data.email,
+        password: data.password,
       }
+    )
 
-      // Save user if exists
-      if (response.data?.user) {
-        localStorage.setItem(
-          "user",
-          JSON.stringify(response.data.user)
-        )
-      }
+    const { token, user } = response.data
 
-      toast.success("Login Successful")
-      console.log(response.data)
+    //Save token
+    localStorage.setItem("token", token)
 
-      form.reset()
+    //Save user (includes role)
+    localStorage.setItem("user", JSON.stringify(user))
 
-         navigate("/layout/dashboard");
+    toast.success("Login Successful")
 
-    } catch (error: any) {
-      const message =
-        error?.response?.data?.message ||
-        "Login failed. Please try again."
+    form.reset()
 
-      toast.error(message)
-      console.error(error)
-    }
+    //ROLE BASED NAVIGATION
+   if (user.role === "SuperAdmin" || user.role === "Admin") {
+  navigate("/layout/dashboard")
+} else {
+  navigate("/")
+}
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.message ||
+      "Login failed. Please try again."
+
+    toast.error(message)
+    console.error(error)
   }
-
+}
   return (
     <div className="flex min-h-screen flex-col justify-center bg-gray-900 px-6 py-12 lg:px-8">
       {/* Logo + Heading */}
