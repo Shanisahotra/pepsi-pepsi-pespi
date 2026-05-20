@@ -1,5 +1,4 @@
 import { Navigate } from "react-router-dom"
-// import { getRole } from "@/utils/auth"\
 import { getRole } from "../utils/auth"
 
 const RoleRoute = ({ children, allowedRoles }: any) => {

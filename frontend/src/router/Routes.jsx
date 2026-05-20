@@ -26,7 +26,7 @@ function Router() {
         <Route
           path="users"
           element={
-            <RoleRoute>
+            <RoleRoute allowedRoles={["SuperAdmin"]}>
               <UsersTable />
             </RoleRoute>
           }

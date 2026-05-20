@@ -17,12 +17,18 @@ export const register= async (req, res, next) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+      const imageUrl = req.file
+      ? `/uploads/${req.file.filename}`
+      : null;
+
+
     const user = await prisma.user.create({
       data: {
         name,
         email,
         password: hashedPassword,
-        role
+        role,
+        image: imageUrl,
       },
     });
 
