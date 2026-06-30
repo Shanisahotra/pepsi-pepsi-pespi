@@ -24,8 +24,8 @@ const formSchema = z.object({
 })
 
 export function LoginForm() {
-    
-     const navigate = useNavigate()
+
+  const navigate = useNavigate()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -35,45 +35,40 @@ export function LoginForm() {
     },
   })
 
-  const { formState: { isSubmitting },} = form
+  const { formState: { isSubmitting }, } = form
 
-   async function onSubmit(data: z.infer<typeof formSchema>) {
-  try {
-    const response = await axios.post(
-      "http://localhost:5000/api/users/login",
-      {
-        email: data.email,
-        password: data.password,
+  async function onSubmit(data: z.infer<typeof formSchema>) {
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/users/login",
+        {
+          email: data.email,
+          password: data.password,
+        }
+      )
+
+      const { token, user } = response.data
+
+      //Save token
+      localStorage.setItem("token", token)
+
+      //Save user (includes role)
+      localStorage.setItem("user", JSON.stringify(user))
+
+      toast.success("Login Successful")
+
+      form.reset()
+
+      //ROLE BASED NAVIGATION
+      if (user.role === "SuperAdmin" || user.role === "Admin") {
+        navigate("/layout/dashboard")
+      } else {
+        navigate("/")
       }
-    )
-
-    const { token, user } = response.data
-
-    //Save token
-    localStorage.setItem("token", token)
-
-    //Save user (includes role)
-    localStorage.setItem("user", JSON.stringify(user))
-
-    toast.success("Login Successful")
-
-    form.reset()
-
-    //ROLE BASED NAVIGATION
-   if (user.role === "SuperAdmin" || user.role === "Admin") {
-  navigate("/layout/dashboard")
-} else {
-  navigate("/")
-}
-  } catch (error: any) {
-    const message =
-      error?.response?.data?.message ||
-      "Login failed. Please try again."
-
-    toast.error(message)
-    console.error(error)
+    } catch (error: any) {
+      console.error(error)
+    }
   }
-}
   return (
     <div className="flex min-h-screen flex-col justify-center bg-gray-900 px-6 py-12 lg:px-8">
       {/* Logo + Heading */}

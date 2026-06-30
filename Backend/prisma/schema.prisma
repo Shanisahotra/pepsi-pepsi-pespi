@@ -17,12 +17,34 @@ model User {
   isBlocked Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt  DateTime @updatedAt
+
+   sentMessages     Message[] @relation("SenderMessages")
+  receivedMessages Message[] @relation("ReceiverMessages")
+}
+
+model Message {
+  id         Int      @id @default(autoincrement())
+
+  senderId   Int
+  receiverId Int
+
+  message    String
+
+  createdAt  DateTime @default(now())
+
+  //RELATIONS
+  sender   User @relation("SenderMessages", fields: [senderId], references: [id])
+  receiver User @relation("ReceiverMessages", fields: [receiverId], references: [id])
 }
 
 enum Role {
   SuperAdmin
   Admin
 }
+
+
+
+
 
 model Outlet {
   id      Int    @id @default(autoincrement())
@@ -72,3 +94,4 @@ model OrderItem {
   order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product    Product  @relation(fields: [productId], references: [id])
 }
+

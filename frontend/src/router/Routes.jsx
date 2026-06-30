@@ -6,6 +6,7 @@ import UsersTable from "../component/UsersTable"
 import Dashboard from "../component/Dashboard"
 import OutletTable from "../component/OutletTable"
 import ProductsTable from "../component/ProductsTable"
+import Chat from "../component/Chat"
 import RoleRoute from "./RoleRoute";
 
 function Router() {
@@ -33,6 +34,7 @@ function Router() {
         />
          <Route path="outlets" element={<OutletTable />} />
          <Route path="products" element={<ProductsTable />} />
+         <Route path="chat" element={<Chat />} />
 
       </Route>
     </Routes>

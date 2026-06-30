@@ -19,7 +19,8 @@ import {
   Settings,
   Store,
   Package,
-  Warehouse
+  Warehouse,
+   MessageSquare
 } from "lucide-react";
 
 import { useNavigate, useLocation } from "react-router-dom";
@@ -61,6 +62,12 @@ export default function AppSidebar() {
       title: "Stock",
       icon: Warehouse,
       path: "/layout/stock",
+      roles: ["SuperAdmin", "Admin"],
+    },
+    {
+      title: "Chat",
+      icon:  MessageSquare,
+      path: "/layout/chat",
       roles: ["SuperAdmin", "Admin"],
     },
     {

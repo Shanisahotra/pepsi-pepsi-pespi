@@ -5,7 +5,6 @@ import redisClient from "../config/redis.js";
  export const createOutlet = async (req, res, next) => {
   try {
     const { name, owner, email, phone, address } = req.body;
-
     const outlet = await prisma.outlet.create({
       data: {
         name,
@@ -15,7 +14,7 @@ import redisClient from "../config/redis.js";
         address,
       },
     });
-
+    
     res.status(201).json({
       message: "Outlet created successfully",
       outlet,
@@ -25,61 +24,92 @@ import redisClient from "../config/redis.js";
   }
 };
 
-//GET ALL OUTLETS
+//GET ALL OUTLETS within redis
+// export const getAllOutlets = async (req, res, next) => {
+//   try {
+//     const page = Number(req.query.page) || 1
+//     const limit = Number(req.query.limit) || 5
+
+//     const skip = (page - 1) * limit
+
+//     // Unique Redis cache key
+//     const cacheKey = `outlets:page:${page}:limit:${limit}`
+
+//     // 1. Check Redis Cache
+//     const cachedOutlets = await redisClient.get(cacheKey)
+
+//     if (cachedOutlets) {
+//       return res.json({
+//         message: "Outlets fetched from Redis cache",
+//         ...JSON.parse(cachedOutlets),
+//       })
+//     }
+
+//     // 2. Fetch from Database
+//     const outlets = await prisma.outlet.findMany({
+//       skip,
+//       take: limit,
+//       orderBy: {
+//         id: "desc",
+//       },
+//     })
+
+//     const totalOutlets = await prisma.outlet.count()
+
+//     const responseData = {
+//       outlets,
+//       totalOutlets,
+//       totalPages: Math.ceil(totalOutlets / limit),
+//       currentPage: page,
+//     }
+
+//     // 3. Store in Redis for 60 sec
+//     await redisClient.setEx(
+//       cacheKey,
+//       60,
+//       JSON.stringify(responseData)
+//     )
+
+//     res.json({
+//       message: "Outlets fetched successfully",
+//       ...responseData,
+//     })
+
+//   } catch (error) {
+//     next(error)
+//   }
+// }
+
 export const getAllOutlets = async (req, res, next) => {
   try {
-    const page = Number(req.query.page) || 1
-    const limit = Number(req.query.limit) || 5
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 5;
 
-    const skip = (page - 1) * limit
+    const skip = (page - 1) * limit;
 
-    // Unique Redis cache key
-    const cacheKey = `outlets:page:${page}:limit:${limit}`
-
-    // 1. Check Redis Cache
-    const cachedOutlets = await redisClient.get(cacheKey)
-
-    if (cachedOutlets) {
-      return res.json({
-        message: "Outlets fetched from Redis cache",
-        ...JSON.parse(cachedOutlets),
-      })
-    }
-
-    // 2. Fetch from Database
+    // Fetch from Database
     const outlets = await prisma.outlet.findMany({
       skip,
       take: limit,
       orderBy: {
         id: "desc",
       },
-    })
-
-    const totalOutlets = await prisma.outlet.count()
-
+    });
+    const totalOutlets = await prisma.outlet.count();
     const responseData = {
       outlets,
       totalOutlets,
       totalPages: Math.ceil(totalOutlets / limit),
       currentPage: page,
-    }
-
-    // 3. Store in Redis for 60 sec
-    await redisClient.setEx(
-      cacheKey,
-      60,
-      JSON.stringify(responseData)
-    )
-
+    };
     res.json({
       message: "Outlets fetched successfully",
       ...responseData,
-    })
-
+    });
   } catch (error) {
-    next(error)
+    next(error);
   }
-}
+};
 
 export const searchOutlets = async (req, res, next) => {
   try {

@@ -9,9 +9,9 @@ redisClient.on("error", (err) =>
 )
 
 redisClient.on("ready", () =>
-  console.log("✅ Redis connected successfully")
+  console.log("Redis connected successfully")
 )
 
-await redisClient.connect()
+//await redisClient.connect()
 
 export default redisClient
